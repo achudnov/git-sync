@@ -338,8 +338,9 @@ case "$(sync_state)" in
 	    exit_assuming_sync
 	else
 	    echo "git-sync: Rebasing failed, likely there are conflicting changes. Resolve them and finish the rebase before repeating git-sync."
+            git branch -f old-$branch_name $branch_name
+            echo "git-sync: The pre-rebase branch $branch_name has been saved in old-$branch_name"
 	    exit 1
 	fi
-	# TODO: save master, if rebasing fails, make a branch of old master
 	;;
 esac
