@@ -146,7 +146,7 @@ sync_state()
 	    ;;
 	"0	0")
 	    echo "equal"
-	    true 
+	    true
 	    ;;
 	"0	"*)
 	    echo "ahead"
@@ -257,7 +257,7 @@ fi
 if [ ! -z "$(local_changes)" ]; then
     autocommit_cmd=""
     config_autocommit_cmd="$(git config --get branch.$branch_name.autocommitscript)"
-    
+
     # discern the three ways to auto-commit
     if [ ! -z "$config_autocommit_cmd" ]; then
 	autocommit_cmd="$config_autocommit_cmd"
@@ -322,8 +322,16 @@ case "$(sync_state)" in
 	fi
 	;;
 "diverged")
-	echo "git-sync: We have diverged. Trying to rebase..."
-	git rebase $remote_name/$branch_name
+        echo "git-sync: We have diverged. Trying to rebase..."
+        rebaseoptions="$(git config --get branch.$branch_name.rebaseoptions)"
+
+        if [ ! -z "$rebaseoptions" ]; then
+            echo "git-sync: Rebasing with $rebaseoptions options"
+            git rebase $rebaseoptions $remote_name/$branch_name
+        else
+            git rebase $remote_name/$branch_name
+        fi
+
 	if [[ $? == 0 && -z "$(git_repo_state)" && "ahead" == "$(sync_state)" ]] ; then
 	    echo "git-sync: Rebasing went fine, pushing..."
 	    git push $remote_name $branch_name:$branch_name
@@ -335,4 +343,3 @@ case "$(sync_state)" in
 	# TODO: save master, if rebasing fails, make a branch of old master
 	;;
 esac
-
